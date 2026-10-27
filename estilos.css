@@ -1,0 +1,566 @@
+/* ==========================================================================
+   FERIASEGURA HUAMANGA - ESTILOS VISUALES
+   Diseño Oficial: Municipalidad Provincial de Huamanga
+   ========================================================================== */
+
+:root {
+  --color-guinda: #681521;
+  --color-guinda-hover: #500f19;
+  --color-dorado: #e5a93c;
+  --color-dorado-suave: #fff6e5;
+  --color-texto: #1e293b;
+  --color-texto-suave: #64748b;
+  --color-borde: #e2e8f0;
+  --color-fondo-input: #ffffff;
+  --color-exito: #10b981;
+  --color-error: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background:
+    linear-gradient(rgba(15, 23, 42, 0.75), rgba(80, 15, 25, 0.85)),
+    url('imagenes/feria.jpg') center/cover no-repeat fixed;
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   CABECERA OFICIAL (TOP BAR)
+   -------------------------------------------------------------------------- */
+.cabecera-superior {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 40px;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.institucion-bloque {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.icono-escudo {
+  width: 44px;
+  height: 44px;
+  background: #ffffff;
+  border: 1px solid var(--color-dorado);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 3px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.icono-escudo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.institucion-texto .subtitulo-gob {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: var(--color-dorado);
+  text-transform: uppercase;
+}
+
+.institucion-texto .nombre-municipio {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #ffffff;
+}
+
+.portal-indicador {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: #a7f3d0;
+  font-weight: 500;
+}
+
+.punto-verde {
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #10b981;
+}
+
+/* --------------------------------------------------------------------------
+   CONTENEDOR CENTRAL
+   -------------------------------------------------------------------------- */
+.contenedor-principal {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 15px;
+}
+
+.tarjeta-login {
+  background: #ffffff;
+  color: var(--color-texto);
+  width: 100%;
+  max-width: 480px;
+  border-radius: 24px;
+  padding: 32px 36px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   LOGO Y ENCABEZADO DE LA TARJETA
+   -------------------------------------------------------------------------- */
+.encabezado-tarjeta {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.emblema-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.caja-emblema {
+  width: 76px;
+  height: 76px;
+  border: 2px solid var(--color-guinda);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  overflow: hidden;
+  padding: 4px;
+  box-shadow: 0 4px 12px rgba(104, 21, 33, 0.15);
+}
+
+.caja-emblema img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.badge-anio {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #f59e0b;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 10px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.titulo-sistema {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  color: #0f172a;
+}
+
+.titulo-sistema .rojo {
+  color: var(--color-guinda);
+}
+
+.subtitulo-sistema {
+  font-size: 12px;
+  color: var(--color-texto-suave);
+  margin-top: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   PESTAÑAS DE ROLES (SELECTOR)
+   -------------------------------------------------------------------------- */
+.selector-roles {
+  display: flex;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 22px;
+  gap: 4px;
+}
+
+.pestana-rol {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 10px 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-texto-suave);
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.pestana-rol.activa {
+  background: #ffffff;
+  color: var(--color-guinda);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* --------------------------------------------------------------------------
+   FORMULARIO Y CAMPOS
+   -------------------------------------------------------------------------- */
+.grupo-campo {
+  margin-bottom: 16px;
+}
+
+.etiqueta-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.etiqueta-fila label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #334155;
+}
+
+.enlace-olvido {
+  font-size: 11px;
+  color: var(--color-guinda);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.enlace-olvido:hover {
+  text-decoration: underline;
+}
+
+.campo-con-icono {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.icono-izq {
+  position: absolute;
+  left: 14px;
+  font-size: 16px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.campo-con-icono input {
+  width: 100%;
+  padding: 12px 14px 12px 42px;
+  border: 1.5px solid var(--color-borde);
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--color-texto);
+  outline: none;
+  transition: border-color 0.2s;
+  background: #fafafa;
+}
+
+.campo-con-icono input:focus {
+  border-color: var(--color-guinda);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(104, 21, 33, 0.1);
+}
+
+.boton-ojo {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #94a3b8;
+}
+
+/* --------------------------------------------------------------------------
+   FILA DE OPCIONES ADICIONALES
+   -------------------------------------------------------------------------- */
+.fila-opciones {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 12px;
+}
+
+.checkbox-etiqueta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #475569;
+  cursor: pointer;
+  user-select: none;
+}
+
+.badge-regla {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+   BOTONES DE ACCIÓN
+   -------------------------------------------------------------------------- */
+.boton-ingresar {
+  width: 100%;
+  background: var(--color-guinda);
+  color: #ffffff;
+  border: none;
+  padding: 13px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.boton-ingresar:hover {
+  background: var(--color-guinda-hover);
+}
+
+.boton-ingresar:active {
+  transform: scale(0.99);
+}
+
+.separador-o {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 18px 0;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+}
+
+.separador-o::before,
+.separador-o::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.separador-o span {
+  padding: 0 10px;
+}
+
+.boton-google {
+  width: 100%;
+  background: #ffffff;
+  color: #334155;
+  border: 1.5px solid #cbd5e1;
+  padding: 11px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background 0.2s;
+}
+
+.boton-google:hover {
+  background: #f8fafc;
+}
+
+/* --------------------------------------------------------------------------
+   CREDENCIALES DEMO DE ACCESO RÁPIDO
+   -------------------------------------------------------------------------- */
+.bloque-demo {
+  margin-top: 18px;
+  text-align: center;
+}
+
+.titulo-demo {
+  font-size: 11px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.pills-demo {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pill-boton {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  padding: 5px 12px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pill-boton:hover {
+  background: var(--color-guinda);
+  color: #ffffff;
+  border-color: var(--color-guinda);
+}
+
+/* --------------------------------------------------------------------------
+   PIE DE TARJETA Y ENLACE DE REGISTRO
+   -------------------------------------------------------------------------- */
+.fila-registro {
+  text-align: center;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed #e2e8f0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.fila-registro a {
+  color: var(--color-guinda);
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.fila-registro a:hover {
+  text-decoration: underline;
+}
+
+.pie-tarjeta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* --------------------------------------------------------------------------
+   ALERTAS Y MENSAJES
+   -------------------------------------------------------------------------- */
+.mensaje-alerta {
+  display: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  animation: fadeIn 0.2s ease;
+}
+
+.mensaje-alerta.error {
+  display: block;
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.mensaje-alerta.exito {
+  display: block;
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+/* --------------------------------------------------------------------------
+   MODAL DE REGISTRO / EMPADRONAMIENTO
+   -------------------------------------------------------------------------- */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-overlay.activo {
+  display: flex;
+}
+
+.modal-caja {
+  background: #ffffff;
+  color: var(--color-texto);
+  width: 100%;
+  max-width: 440px;
+  border-radius: 20px;
+  padding: 26px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.modal-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.modal-cabecera h3 {
+  font-size: 17px;
+  color: var(--color-guinda);
+}
+
+.boton-cerrar-modal {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #94a3b8;
+}

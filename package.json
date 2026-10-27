@@ -1,0 +1,10 @@
+{
+  "name": "feriasegura-huamanga",
+  "version": "1.0.0",
+  "description": "Sistema FeriaSegura Huamanga (FSH)",
+  "scripts": {
+    "test": "node pruebas.js"
+  },
+  "author": "Equipo 01",
+  "license": "ISC"
+}

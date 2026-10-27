@@ -1,0 +1,4 @@
+Coloca aquí tus imágenes personalizadas si deseas reemplazar los iconos y el fondo:
+- fondo.jpg  (para cambiar el fondo de pantalla)
+- escudo.png (para el escudo municipal de la esquina superior izquierda)
+- logo.png   (para el logo central encima del título)
