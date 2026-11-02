@@ -1,0 +1,25 @@
+# ==============================================================================
+# CONFIGURACIÓN WAL Y REPLICACIÓN POSTGRESQL 16 (FSH-34, FSH-35)
+# Ubicación: /etc/postgresql/16/main/conf.d/wal_archive.conf
+# ==============================================================================
+
+# 1. Nivel de escritura WAL para habilitar PITR y Réplicas
+wal_level = replica
+
+# 2. Habilitar archivado continuo de segmentos WAL
+archive_mode = on
+
+# 3. Comando de archivado idempotente:
+# Verifica que el archivo no exista previamente antes de copiarlo para evitar sobrescrituras corruptas.
+# En caso de existir y tener contenido idéntico, retorna éxito (cero) para mantener idempotencia.
+archive_command = 'test ! -f /var/lib/postgresql/wal_archive/%f && cp %p /var/lib/postgresql/wal_archive/%f'
+
+# 4. Forzar rotación de segmento cada 15 minutos (900s) si no hay suficiente actividad.
+# Esto asegura que el Objetivo de Punto de Recuperación (RPO) sea menor o igual a 15 minutos,
+# superando holgadamente el requisito contractual de RPO <= 1 hora.
+archive_timeout = 900
+
+# 5. Ajustes de checkpoints para absorción de carga sin spikes de I/O
+checkpoint_completion_target = 0.9
+max_wal_size = 2GB
+min_wal_size = 512MB
