@@ -4,26 +4,56 @@
  * ARCHIVO: logica.js
  * CURSO: Construcción y Evolución de Software
  * 
- * APLICACIÓN DE PRINCIPIOS SOLID (Fácil de explicar al docente):
- * - S (Responsabilidad Única): 
- *     * ValidadorDni: Solo valida el formato del DNI peruano.
- *     * AlmacenUsuarios: Solo gestiona la memoria de usuarios y comerciantes.
- *     * ServicioAutenticacion: Solo orquesta el inicio de sesión y registro.
- * - D (Inversión de Dependencias):
- *     * El servicio de autenticación recibe el almacén como parámetro,
- *       no depende rígidamente de una base de datos específica.
+ * APLICACIÓN DE PRINCIPIOS DE INGENIERÍA DE SOFTWARE:
+ * - SOLID:
+ *     * S (Single Responsibility):
+ *         - ValidadorDni: Solo valida el formato del DNI peruano.
+ *         - AlmacenUsuarios: Solo gestiona persistencia y búsqueda de usuarios.
+ *         - ControladorAccesoACL: Gestiona la matriz de roles y permisos (ACL).
+ *         - ServicioAutenticacion: Orquesta el login unificado y registro.
+ *     * D (Dependency Inversion):
+ *         - El servicio recibe el almacén y el controlador ACL por inyección.
+ * - ACL (Access Control List):
+ *     - Sistema unificado de autenticación: El usuario NO elige su rol en la UI.
+ *     - El sistema detecta su identidad, consulta la lista de control de acceso
+ *       (ACL) y determina qué permisos y recursos tiene permitidos.
  * ============================================================================
  */
 
 // ----------------------------------------------------------------------------
-// 1. VALIDADOR DE DNI (Principio S: Responsabilidad Única)
+// 1. MATRIZ DE ROLES Y PERMISOS ACL (Alineado con esquema PostgreSQL FSH-28)
+// ----------------------------------------------------------------------------
+const MATRIZ_ROLES_PERMISOS = {
+  COMERCIANTE: [
+    'PUESTO_CONSULTAR_MAPA',
+    'PUESTO_RESERVAR',
+    'ELECTRICO_DECLARAR',
+    'PAGO_ADJUNTAR_COMPROBANTE',
+    'CREDENTIAL_DESCARGAR'
+  ],
+  FISCALIZADOR_MUNICIPAL: [
+    'QR_ESCANEAR_VERIFICAR',
+    'ACTA_INFRACCION_REGISTRAR',
+    'PUESTO_CONSULTAR_MAPA'
+  ],
+  ADMINISTRADOR_MUNICIPAL: [
+    '*' // Acceso total: catastro, zonificación, ferias, auditoría, asignación de roles
+  ],
+  ENCARGADO_TESORERIA: [
+    'PAGO_VALIDAR_TESORERIA',
+    'PUESTO_CONSULTAR_MAPA'
+  ],
+  INSPECTOR_DEFENSA_CIVIL: [
+    'ELECTRICO_MONITOREAR',
+    'PUESTO_BLOQUEAR_RIESGO',
+    'PUESTO_CONSULTAR_MAPA'
+  ]
+};
+
+// ----------------------------------------------------------------------------
+// 2. VALIDADOR DE DNI (Principio S: Responsabilidad Única)
 // ----------------------------------------------------------------------------
 const ValidadorDni = {
-  /**
-   * Comprueba que el DNI tenga exactamente 8 dígitos y sean solo números.
-   * @param {string} dni 
-   * @returns {{ esValido: boolean, mensaje: string }}
-   */
   validar(dni) {
     if (!dni || typeof dni !== 'string') {
       return { esValido: false, mensaje: 'Debe ingresar un número de DNI.' };
@@ -35,7 +65,6 @@ const ValidadorDni = {
       return { esValido: false, mensaje: 'El DNI debe tener exactamente 8 dígitos.' };
     }
 
-    // Expresión regular: solo números del 0 al 9
     const soloDigitos = /^[0-9]{8}$/.test(dniLimpio);
     if (!soloDigitos) {
       return { esValido: false, mensaje: 'El DNI solo puede contener números, sin letras ni símbolos.' };
@@ -46,161 +75,238 @@ const ValidadorDni = {
 };
 
 // ----------------------------------------------------------------------------
-// 2. ALMACÉN DE USUARIOS (Principio S y D)
-// Guarda los comerciantes del padrón y los trabajadores de la municipalidad.
+// 3. CONTROLADOR DE ACCESO ACL (Principio S: Control de Permisos y Recursos)
+// ----------------------------------------------------------------------------
+class ControladorAccesoACL {
+  constructor(matriz = MATRIZ_ROLES_PERMISOS) {
+    this.matriz = matriz;
+  }
+
+  obtenerPermisos(rol) {
+    return this.matriz[rol] || [];
+  }
+
+  tienePermiso(rol, codigoPermiso) {
+    if (!rol) return false;
+    const permisos = this.obtenerPermisos(rol);
+    if (permisos.includes('*')) return true; // Permiso maestro (Admin)
+    return permisos.includes(codigoPermiso);
+  }
+}
+
+// ----------------------------------------------------------------------------
+// 4. ALMACÉN DE USUARIOS (Persistencia desacoplada - Principio S y D)
 // ----------------------------------------------------------------------------
 class AlmacenUsuarios {
   constructor() {
     // Comerciantes empadronados de prueba (Datos Semilla)
     this.comerciantes = [
       {
+        identificador: '45871234',
         dni: '45871234',
         nombreCompleto: 'Juan Carlos Pérez Flores',
         telefono: '966123456',
         giro: 'Artesanía y Retablos',
         clave: '123456',
+        rol: 'COMERCIANTE',
+        tipoUsuario: 'COMERCIANTE',
         estado: 'EMPADRONADO'
       },
       {
+        identificador: '72345678',
         dni: '72345678',
         nombreCompleto: 'María Elena Quispe Alanya',
         telefono: '966789123',
         giro: 'Gastronomía Tradicional',
         clave: '123456',
+        rol: 'COMERCIANTE',
+        tipoUsuario: 'COMERCIANTE',
         estado: 'EMPADRONADO'
       }
     ];
 
-    // Funcionarios municipales para fiscalización y administración (FSH-22)
+    // Funcionarios municipales institucionales (FSH-22, FSH-28)
     this.usuariosInternos = [
       {
-        usuario: 'fiscalizador',
+        identificador: 'fiscalizador',
         alias: 'fiscalizador@mph.gob.pe',
+        dni: '10203040',
         nombreCompleto: 'Carlos Mendoza Bendezú',
-        rol: 'Fiscalizador',
+        cargo: 'Inspector de Serenazgo y Fiscalización',
+        rol: 'FISCALIZADOR_MUNICIPAL',
+        tipoUsuario: 'FUNCIONARIO_INTERNO',
         clave: '123456'
       },
       {
-        usuario: 'admin',
+        identificador: 'admin',
         alias: 'admin@mph.gob.pe',
+        dni: '40506070',
         nombreCompleto: 'Aldo Marcos Yanasupo',
-        rol: 'Gestión MPH',
+        cargo: 'Subgerente de Comercio y Mercados',
+        rol: 'ADMINISTRADOR_MUNICIPAL',
+        tipoUsuario: 'FUNCIONARIO_INTERNO',
         clave: 'admin123'
+      },
+      {
+        identificador: 'defensacivil',
+        alias: 'defensacivil@mph.gob.pe',
+        dni: '30405060',
+        nombreCompleto: 'Roberto Castillo Huamán',
+        cargo: 'Inspector de Seguridad y Riesgos Eléctricos',
+        rol: 'INSPECTOR_DEFENSA_CIVIL',
+        tipoUsuario: 'FUNCIONARIO_INTERNO',
+        clave: '123456'
+      },
+      {
+        identificador: 'tesoreria',
+        alias: 'tesoreria@mph.gob.pe',
+        dni: '20304050',
+        nombreCompleto: 'Rosa Gutiérrez Prado',
+        cargo: 'Responsable de Caja y Pagos TUPA',
+        rol: 'ENCARGADO_TESORERIA',
+        tipoUsuario: 'FUNCIONARIO_INTERNO',
+        clave: '123456'
       }
     ];
   }
 
-  // Buscar un comerciante por su DNI (FSH-24)
-  buscarComerciantePorDni(dni) {
-    return this.comerciantes.find(c => c.dni === dni.trim());
+  // Búsqueda polimórfica y unificada por identificador (DNI, usuario o correo)
+  buscarPorIdentificador(identificador) {
+    if (!identificador || typeof identificador !== 'string') return null;
+    const idLimpio = identificador.trim().toLowerCase();
+
+    // 1. Si tiene 8 dígitos numéricos, buscar en comerciantes por DNI
+    if (/^[0-9]{8}$/.test(idLimpio)) {
+      const comerciante = this.comerciantes.find(c => c.dni === idLimpio);
+      if (comerciante) return comerciante;
+
+      // También puede ser el DNI de un funcionario interno
+      const internoPorDni = this.usuariosInternos.find(u => u.dni === idLimpio);
+      if (internoPorDni) return internoPorDni;
+    }
+
+    // 2. Buscar en usuarios internos por usuario o alias (correo institucional)
+    return this.usuariosInternos.find(u => 
+      u.identificador.toLowerCase() === idLimpio || 
+      (u.alias && u.alias.toLowerCase() === idLimpio)
+    ) || null;
   }
 
-  // Guardar un nuevo comerciante en el padrón (FSH-10, FSH-36)
+  buscarComerciantePorDni(dni) {
+    if (!dni) return null;
+    return this.comerciantes.find(c => c.dni === dni.trim()) || null;
+  }
+
+  buscarUsuarioInterno(usuario) {
+    return this.buscarPorIdentificador(usuario);
+  }
+
   registrarComerciante(nuevoComerciante) {
     this.comerciantes.push(nuevoComerciante);
     return nuevoComerciante;
   }
-
-  // Buscar funcionario municipal por su usuario institucional
-  buscarUsuarioInterno(usuario) {
-    if (!usuario) return null;
-    const uLimpio = usuario.trim().toLowerCase();
-    return this.usuariosInternos.find(u => 
-      u.usuario.toLowerCase() === uLimpio || 
-      (u.alias && u.alias.toLowerCase() === uLimpio)
-    );
-  }
 }
 
 // ----------------------------------------------------------------------------
-// 3. SERVICIO DE AUTENTICACIÓN (Principio S: Orquestar el Login)
+// 5. SERVICIO DE AUTENTICACIÓN Y CONTROL DE ACCESO (SOLID + ACL)
 // ----------------------------------------------------------------------------
 class ServicioAutenticacion {
-  constructor(almacen = new AlmacenUsuarios()) {
+  constructor(almacen = new AlmacenUsuarios(), controladorAcl = new ControladorAccesoACL()) {
     // Inyección de dependencias (Principio D)
     this.almacen = almacen;
+    this.controladorAcl = controladorAcl;
   }
 
   /**
-   * Iniciar sesión como comerciante con DNI y clave (Jira: FSH-24)
+   * INICIO DE SESIÓN UNIFICADO (Sin selección manual de rol)
+   * El sistema valida la identidad del usuario y aplica ACL para determinar su rol y permisos.
+   * @param {string} identificador DNI de 8 dígitos o usuario/correo institucional
+   * @param {string} clave Contraseña
    */
-  iniciarSesionComerciante(dni, clave) {
-    // 1. Validar formato de DNI usando el Validador
-    const resultadoValidacion = ValidadorDni.validar(dni);
-    if (!resultadoValidacion.esValido) {
-      return { exito: false, mensaje: resultadoValidacion.mensaje };
+  iniciarSesion(identificador, clave) {
+    if (!identificador || identificador.trim() === '') {
+      return { exito: false, mensaje: 'Por favor, ingrese su DNI o usuario institucional.' };
     }
 
     if (!clave || clave.trim() === '') {
       return { exito: false, mensaje: 'Por favor, ingrese su contraseña.' };
     }
 
-    // 2. Buscar en el padrón de comerciantes
-    const comerciante = this.almacen.buscarComerciantePorDni(dni);
-    if (!comerciante) {
+    const idLimpio = identificador.trim();
+
+    // 1. Buscar al usuario en el almacén de forma unificada
+    const usuario = this.almacen.buscarPorIdentificador(idLimpio);
+
+    if (!usuario) {
+      // Mensaje orientativo si intentó con un número de DNI
+      if (/^[0-9]{8}$/.test(idLimpio)) {
+        return { 
+          exito: false, 
+          mensaje: 'El DNI no se encuentra empadronado. Por favor, regístrese primero en el padrón municipal.' 
+        };
+      }
       return { 
         exito: false, 
-        mensaje: 'El DNI no está empadronado. Por favor, regístrese primero en el padrón municipal.' 
+        mensaje: 'Usuario o credencial no encontrada en el sistema municipal.' 
       };
     }
 
-    // 3. Validar contraseña
-    if (comerciante.clave !== clave) {
+    // 2. Verificar contraseña
+    if (usuario.clave !== clave) {
       return { exito: false, mensaje: 'Contraseña incorrecta. Intente de nuevo.' };
     }
 
+    // 3. Aplicar ACL: Obtener los permisos autorizados para el rol del usuario
+    const permisosAutorizados = this.controladorAcl.obtenerPermisos(usuario.rol);
+
     return {
       exito: true,
-      mensaje: `¡Bienvenido(a), ${comerciante.nombreCompleto}!`,
+      mensaje: `¡Bienvenido(a), ${usuario.nombreCompleto}!`,
       usuario: {
-        dni: comerciante.dni,
-        nombre: comerciante.nombreCompleto,
-        giro: comerciante.giro,
-        rol: 'Comerciante'
+        identificador: usuario.identificador,
+        dni: usuario.dni,
+        nombre: usuario.nombreCompleto,
+        rol: usuario.rol,
+        tipoUsuario: usuario.tipoUsuario,
+        giro: usuario.giro || null,
+        cargo: usuario.cargo || null,
+        permisos: permisosAutorizados,
+        // Método de verificación directa de ACL
+        tienePermiso: (codigoPermiso) => this.controladorAcl.tienePermiso(usuario.rol, codigoPermiso)
       }
     };
   }
 
   /**
-   * Iniciar sesión como Fiscalizador o Administrador MPH (Jira: FSH-22)
+   * Métodos auxiliares para compatibilidad con código anterior o pruebas específicas
    */
-  iniciarSesionInterno(usuario, clave, rolEsperado) {
-    if (!usuario || usuario.trim() === '') {
-      return { exito: false, mensaje: 'Debe ingresar su usuario institucional o correo.' };
+  iniciarSesionComerciante(dni, clave) {
+    const validacion = ValidadorDni.validar(dni);
+    if (!validacion.esValido) {
+      return { exito: false, mensaje: validacion.mensaje };
     }
-    if (!clave || clave.trim() === '') {
-      return { exito: false, mensaje: 'Debe ingresar su contraseña.' };
-    }
+    return this.iniciarSesion(dni, clave);
+  }
 
-    const funcionario = this.almacen.buscarUsuarioInterno(usuario);
-    if (!funcionario) {
-      return { exito: false, mensaje: 'Usuario no registrado en el sistema de la municipalidad.' };
-    }
+  iniciarSesionInterno(usuario, clave, rolEsperado = null) {
+    const resultado = this.iniciarSesion(usuario, clave);
+    if (!resultado.exito) return resultado;
 
-    if (funcionario.clave !== clave) {
-      return { exito: false, mensaje: 'Contraseña incorrecta.' };
-    }
-
-    if (rolEsperado && funcionario.rol !== rolEsperado) {
-      return { 
-        exito: false, 
-        mensaje: `Acceso denegado: este usuario pertenece al rol ${funcionario.rol}.` 
-      };
-    }
-
-    return {
-      exito: true,
-      mensaje: `¡Acceso concedido! Bienvenido ${funcionario.nombreCompleto}`,
-      usuario: {
-        usuario: funcionario.usuario,
-        nombre: funcionario.nombreCompleto,
-        rol: funcionario.rol
+    if (rolEsperado) {
+      const rolNormalizado = rolEsperado.toUpperCase().replace(/\s+/g, '_');
+      const rolUsuario = resultado.usuario.rol.toUpperCase();
+      if (!rolUsuario.includes(rolNormalizado) && !rolNormalizado.includes(rolUsuario)) {
+        return {
+          exito: false,
+          mensaje: `Acceso denegado: el usuario no cuenta con el rol requerido.`
+        };
       }
-    };
+    }
+    return resultado;
   }
 
   /**
-   * Registrar nuevo comerciante en el padrón municipal (Jira: FSH-10, FSH-36)
+   * Registro de Comerciante en el Padrón Municipal (FSH-10, FSH-36)
    */
   registrarNuevoComerciante(datos) {
     const { dni, nombreCompleto, telefono, giro, clave } = datos;
@@ -211,13 +317,13 @@ class ServicioAutenticacion {
       return { exito: false, mensaje: validacionDni.mensaje };
     }
 
-    // 2. Validar que no esté repetido (Regla de unicidad de DNI)
-    const existente = this.almacen.buscarComerciantePorDni(dni);
+    // 2. Regla de unicidad de DNI
+    const existente = this.almacen.buscarPorIdentificador(dni);
     if (existente) {
       return { exito: false, mensaje: 'Este número de DNI ya está empadronado en el sistema.' };
     }
 
-    // 3. Validar campos obligatorios
+    // 3. Validaciones de datos obligatorios
     if (!nombreCompleto || nombreCompleto.trim().length < 3) {
       return { exito: false, mensaje: 'Debe ingresar sus nombres y apellidos completos.' };
     }
@@ -225,13 +331,16 @@ class ServicioAutenticacion {
       return { exito: false, mensaje: 'La contraseña debe tener al menos 4 caracteres.' };
     }
 
-    // 4. Guardar
+    // 4. Registro con rol COMERCIANTE asignado automáticamente por el sistema
     const nuevo = {
+      identificador: dni.trim(),
       dni: dni.trim(),
       nombreCompleto: nombreCompleto.trim(),
       telefono: telefono || '',
       giro: giro || 'Comercio General',
       clave: clave,
+      rol: 'COMERCIANTE',
+      tipoUsuario: 'COMERCIANTE',
       estado: 'EMPADRONADO'
     };
 
@@ -245,7 +354,13 @@ class ServicioAutenticacion {
   }
 }
 
-// Exportar para que funcione tanto en Node.js (pruebas) como en el Navegador
+// Exportación para pruebas en Node.js y uso en el navegador
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { ValidadorDni, AlmacenUsuarios, ServicioAutenticacion };
+  module.exports = {
+    ValidadorDni,
+    ControladorAccesoACL,
+    AlmacenUsuarios,
+    ServicioAutenticacion,
+    MATRIZ_ROLES_PERMISOS
+  };
 }
