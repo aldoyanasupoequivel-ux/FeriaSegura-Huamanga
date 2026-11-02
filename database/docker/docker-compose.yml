@@ -1,5 +1,3 @@
-﻿version: '3.8'
-
 services:
   postgres:
     image: postgres:16-alpine
@@ -10,7 +8,6 @@ services:
       POSTGRES_USER: feriasegura_user
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Configura tu .env}
       PGDATA: /var/lib/postgresql/data/pgdata
-    # ParÃ¡metros de rendimiento para PostgreSQL 16 (FSH-32, FSH-33, FSH-37)
     command: >
       postgres
       -c max_connections=200
@@ -30,10 +27,10 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      # InicializaciÃ³n en orden (el init-db.sh llama a las migraciones)
-      - ./init-db.sh:/docker-entrypoint-initdb.d/00_init-db.sh:ro
+      # Script de inicialización que orquesta las migraciones en orden
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
       # Migraciones montadas para que init-db.sh las consuma
-      - ../migrations:/docker-entrypoint-initdb.d:ro
+      - ../migrations:/migrations:ro
       # Scripts de seguridad accesibles en /security
       - ../security:/security:ro
       # Tests accesibles en /tests
@@ -49,7 +46,7 @@ services:
       retries: 10
       start_period: 30s
 
-  # Servicio de administraciÃ³n pgAdmin (solo desarrollo)
+  # Servicio de administración pgAdmin (solo desarrollo)
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: feriasegura_pgadmin

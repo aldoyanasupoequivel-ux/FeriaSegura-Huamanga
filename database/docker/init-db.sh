@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # ==============================================================================
 # FERIA SEGURA HUAMANGA (FeriaSegura)
 # Script de Inicialización de Base de Datos
@@ -9,32 +9,21 @@
 
 set -e  # Abortar en caso de cualquier error
 
-PGCONN="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}"
+export PGPASSWORD="${POSTGRES_PASSWORD}"
 
 echo "============================================================"
 echo " FeriaSegura Huamanga — Inicialización de Base de Datos"
 echo " PostgreSQL $(psql --version)"
-echo " Fecha: $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 echo "============================================================"
 
-# Función para ejecutar una migración
+# Función para ejecutar una migración (conexión por socket local del contenedor)
 run_migration() {
-    local FILE="$1"
-    local LABEL="$2"
+    FILE="$1"
+    LABEL="$2"
     echo ""
     echo ">>> Ejecutando: ${LABEL}"
-    psql "${PGCONN}" -v ON_ERROR_STOP=1 -f "/docker-entrypoint-initdb.d/${FILE}"
+    psql -v ON_ERROR_STOP=1 --username "${POSTGRES_USER}" --dbname "${POSTGRES_DB}" -f "/migrations/${FILE}"
     echo "    [OK] ${LABEL} completada."
-}
-
-# Función para ejecutar un script de seguridad
-run_security() {
-    local FILE="$1"
-    local LABEL="$2"
-    echo ""
-    echo ">>> Aplicando seguridad: ${LABEL}"
-    psql "${PGCONN}" -v ON_ERROR_STOP=1 -f "/security/${FILE}"
-    echo "    [OK] ${LABEL} aplicada."
 }
 
 echo ""
@@ -87,17 +76,17 @@ run_migration "008_fix_audit_worm_integrity.sql"        "008 — Corrección Int
 
 echo ""
 echo "─────────────────────────────────────────────────────────"
-echo " FASE 9: Row Level Security (RLS)"
+echo " FASE 9: Roles de Aplicación y Grants de Seguridad"
 echo "─────────────────────────────────────────────────────────"
-run_migration "009_enable_row_level_security.sql"       "009 — Row Level Security"
+echo ">>> Aplicando roles y grants..."
+psql -v ON_ERROR_STOP=1 --username "${POSTGRES_USER}" --dbname "${POSTGRES_DB}" -f "/security/roles_and_grants.sql"
+echo "    [OK] Roles y grants aplicados."
 
 echo ""
 echo "─────────────────────────────────────────────────────────"
-echo " FASE 10: Roles de Aplicación y Grants de Seguridad"
+echo " FASE 10: Row Level Security (RLS)"
 echo "─────────────────────────────────────────────────────────"
-echo ">>> Aplicando roles y grants..."
-psql "${PGCONN}" -v ON_ERROR_STOP=1 -f "/security/roles_and_grants.sql"
-echo "    [OK] Roles y grants aplicados."
+run_migration "009_enable_row_level_security.sql"       "009 — Row Level Security"
 
 echo ""
 echo "============================================================"

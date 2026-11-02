@@ -27,6 +27,9 @@ BEGIN
     FOR UPDATE OF s;
 
     IF v_id_sector IS NULL THEN
+        IF TG_OP = 'DELETE' THEN
+            RETURN OLD;
+        END IF;
         RAISE EXCEPTION 'DATOS_INCONSISTENTES: No se pudo identificar el sector asociado a la declaración eléctrica %', v_declaracion_id
             USING ERRCODE = 'data_exception';
     END IF;
