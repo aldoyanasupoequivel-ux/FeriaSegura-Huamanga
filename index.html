@@ -19,10 +19,6 @@
         <div class="nombre-municipio">MUNICIPALIDAD PROVINCIAL DE HUAMANGA</div>
       </div>
     </div>
-    <div class="portal-indicador">
-      <span class="punto-verde"></span>
-      <span>Portal Oficial de Ferias y Comercio</span>
-    </div>
   </header>
 
   <!-- CONTENEDOR PRINCIPAL -->
@@ -41,43 +37,29 @@
         <p class="subtitulo-sistema">Sistema de Gestión, Carga Eléctrica y Fiscalización QR</p>
       </div>
 
-      <!-- SELECTOR DE ROLES (3 PESTAÑAS SIN EMOJIS) -->
-      <div class="selector-roles" role="tablist">
-        <button type="button" class="pestana-rol activa" id="tab-comerciante" onclick="cambiarRol('Comerciante')">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Comerciante
-        </button>
-        <button type="button" class="pestana-rol" id="tab-fiscalizador" onclick="cambiarRol('Fiscalizador')">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          Fiscalizador
-        </button>
-        <button type="button" class="pestana-rol" id="tab-gestion" onclick="cambiarRol('Gestión MPH')">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>
-          Gestión MPH
-        </button>
-      </div>
-
       <!-- ALERTA DE MENSAJES (ERROR / ÉXITO) -->
       <div id="caja-alerta" class="mensaje-alerta"></div>
 
-      <!-- FORMULARIO DE INGRESO -->
+      <!-- FORMULARIO DE INGRESO UNIFICADO -->
       <form id="formulario-login" onsubmit="procesarIngreso(event)">
 
-        <!-- CAMPO 1: IDENTIFICACIÓN (DNI O CORREO SEGÚN EL ROL) -->
+        <!-- CAMPO 1: IDENTIFICACIÓN UNIFICADA (DNI O USUARIO/CORREO) -->
         <div class="grupo-campo">
           <div class="etiqueta-fila">
-            <label id="etiqueta-identidad" for="campo-identidad">DNI DEL COMERCIANTE</label>
+            <label id="etiqueta-identidad" for="campo-identidad">DNI O USUARIO INSTITUCIONAL</label>
           </div>
           <div class="campo-con-icono">
             <span class="icono-izq" id="icono-campo-id">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 15h.01"/><path d="M7 9h.01"/><rect x="11" y="9" width="6" height="6"/></svg>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
             </span>
             <input 
               type="text" 
               id="campo-identidad" 
-              placeholder="Ingrese su número de DNI (8 dígitos)"
-              maxlength="8"
-              autocomplete="off"
+              placeholder="Ingrese su DNI (8 dígitos) o usuario municipal"
+              autocomplete="username"
               required
             >
           </div>
@@ -91,7 +73,10 @@
           </div>
           <div class="campo-con-icono">
             <span class="icono-izq">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
             </span>
             <input 
               type="password" 
@@ -100,7 +85,10 @@
               required
             >
             <button type="button" class="boton-ojo" onclick="alternarVisibilidadClave()" title="Ver contraseña">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
             </button>
           </div>
         </div>
@@ -119,19 +107,7 @@
           Ingresar al Sistema
         </button>
 
-
-
       </form>
-
-      <!-- ACCESO RÁPIDO PARA EVALUACIÓN DOCENTE -->
-      <div class="bloque-demo">
-        <div class="titulo-demo">Credenciales demo de acceso rápido:</div>
-        <div class="pills-demo">
-          <button type="button" class="pill-boton" onclick="cargarDemo('comerciante')">Comerciante</button>
-          <button type="button" class="pill-boton" onclick="cargarDemo('fiscalizador')">Fiscalizador QR</button>
-          <button type="button" class="pill-boton" onclick="cargarDemo('admin')">Admin MPH</button>
-        </div>
-      </div>
 
       <!-- ENLACE PARA REGISTRARSE EN EL PADRÓN -->
       <div class="fila-registro" id="bloque-registro-comerciante">
@@ -155,7 +131,7 @@
         <button class="boton-cerrar-modal" onclick="cerrarModalRegistro()">&times;</button>
       </div>
       <p style="font-size: 12px; color: #64748b; margin-bottom: 14px;">
-        Registro oficial único en el sistema de la Municipalidad Provincial de Huamanga.
+        Registro oficial único en el sistema de la Municipalidad Provincial de Huamanga (FSH-10, FSH-36).
       </p>
 
       <form onsubmit="procesarRegistro(event)">
@@ -196,21 +172,23 @@
     </div>
   </div>
 
-  <!-- MODAL DE SESIÓN EXITOSA (DEMOSTRACIÓN FUNCIONAL) -->
+  <!-- MODAL DE SESIÓN EXITOSA CON VALIDACIÓN ACL -->
   <div class="modal-overlay" id="modal-exito">
-    <div class="modal-caja" style="text-align: center;">
-      <div style="margin-bottom: 14px;">
-        <svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <div class="modal-caja modal-caja-exito">
+      <div style="margin-bottom: 12px; text-align: center;">
+        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/>
           <path d="m9 12 2 2 4-4"/>
         </svg>
       </div>
-      <h3 style="color: #047857; margin-bottom: 8px;" id="exito-titulo">¡Sesión Iniciada con Éxito!</h3>
-      <p id="exito-detalle" style="font-size: 14px; color: #334155; margin-bottom: 20px;"></p>
-      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 20px; font-size: 13px; text-align: left;" id="exito-datos">
-      </div>
+      <h3 style="color: #065f46; margin-bottom: 4px; text-align: center;" id="exito-titulo">¡Sesión Iniciada con Éxito!</h3>
+      <p id="exito-detalle" style="font-size: 13px; color: #475569; margin-bottom: 16px; text-align: center;"></p>
+      
+      <!-- CONTENEDOR DE DETALLES DEL USUARIO Y CONTROL DE ACCESO ACL -->
+      <div id="exito-datos" class="caja-detalle-acl"></div>
+
       <button class="boton-ingresar" onclick="cerrarModalExito()">
-        Continuar al Módulo
+        Entrar al Sistema
       </button>
     </div>
   </div>
