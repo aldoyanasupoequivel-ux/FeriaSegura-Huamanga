@@ -10,10 +10,16 @@
  */
 
 const assert = require('assert');
-const { ValidadorDni, AlmacenUsuarios, ServicioAutenticacion } = require('./logica');
+const { 
+  ValidadorDni, 
+  ControladorAccesoACL, 
+  AlmacenUsuarios, 
+  ServicioAutenticacion,
+  MATRIZ_ROLES_PERMISOS
+} = require('./logica');
 
 console.log('\n======================================================================');
-console.log('🧪 FERIASEGURA HUAMANGA - SUITE DE PRUEBAS UNITARIAS (TDD)');
+console.log('🧪 FERIASEGURA HUAMANGA - SUITE DE PRUEBAS UNITARIAS (TDD + ACL)');
 console.log('Curso: Construcción y Evolución de Software (2026-II)');
 console.log('======================================================================\n');
 
@@ -68,22 +74,70 @@ ejecutarPrueba('Rechazar DNI vacío o nulo', () => {
 });
 
 // ----------------------------------------------------------------------------
-// BLOQUE 2: PRUEBAS DE INICIO DE SESIÓN DE COMERCIANTE (Jira: FSH-24)
+// BLOQUE 2: CONTROLADOR DE ACCESO ACL (Access Control List)
 // ----------------------------------------------------------------------------
-console.log('\n--- 🔑 2. Pruebas de Inicio de Sesión de Comerciante (FSH-24) ---');
+console.log('\n--- 🛡️ 2. Pruebas de Control de Acceso ACL (Permisos y Restricciones) ---');
 
-ejecutarPrueba('Iniciar sesión exitosamente con DNI y clave correctos', () => {
+ejecutarPrueba('Comerciante debe tener permisos para reservar puestos pero NO para fiscalizar ni crear ferias', () => {
+  const acl = new ControladorAccesoACL();
+  assert.strictEqual(acl.tienePermiso('COMERCIANTE', 'PUESTO_RESERVAR'), true);
+  assert.strictEqual(acl.tienePermiso('COMERCIANTE', 'ELECTRICO_DECLARAR'), true);
+  assert.strictEqual(acl.tienePermiso('COMERCIANTE', 'QR_ESCANEAR_VERIFICAR'), false);
+  assert.strictEqual(acl.tienePermiso('COMERCIANTE', 'FERIA_CREAR'), false);
+});
+
+ejecutarPrueba('Fiscalizador de Serenazgo debe tener permisos para escanear QR y registrar actas', () => {
+  const acl = new ControladorAccesoACL();
+  assert.strictEqual(acl.tienePermiso('FISCALIZADOR_MUNICIPAL', 'QR_ESCANEAR_VERIFICAR'), true);
+  assert.strictEqual(acl.tienePermiso('FISCALIZADOR_MUNICIPAL', 'ACTA_INFRACCION_REGISTRAR'), true);
+  assert.strictEqual(acl.tienePermiso('FISCALIZADOR_MUNICIPAL', 'PUESTO_RESERVAR'), false);
+});
+
+ejecutarPrueba('Administrador Municipal cuenta con permiso maestro sobre todo el sistema', () => {
+  const acl = new ControladorAccesoACL();
+  assert.strictEqual(acl.tienePermiso('ADMINISTRADOR_MUNICIPAL', 'FERIA_CREAR'), true);
+  assert.strictEqual(acl.tienePermiso('ADMINISTRADOR_MUNICIPAL', 'USUARIO_ASIGNAR_ROL'), true);
+  assert.strictEqual(acl.tienePermiso('ADMINISTRADOR_MUNICIPAL', 'PUESTO_BLOQUEAR_RIESGO'), true);
+});
+
+// ----------------------------------------------------------------------------
+// BLOQUE 3: LOGIN UNIFICADO CON DETERMINACIÓN AUTOMÁTICA DE ROL
+// ----------------------------------------------------------------------------
+console.log('\n--- 🔑 3. Pruebas de Login Unificado (Sin selección manual de usuario) ---');
+
+ejecutarPrueba('Inicio de sesión unificado con DNI reconoce automáticamente al Comerciante con sus permisos', () => {
   const servicio = new ServicioAutenticacion(new AlmacenUsuarios());
-  const respuesta = servicio.iniciarSesionComerciante('45871234', '123456');
-  
+  const respuesta = servicio.iniciarSesion('45871234', '123456');
+
   assert.strictEqual(respuesta.exito, true);
-  assert.strictEqual(respuesta.usuario.rol, 'Comerciante');
+  assert.strictEqual(respuesta.usuario.rol, 'COMERCIANTE');
   assert.strictEqual(respuesta.usuario.dni, '45871234');
+  assert.strictEqual(respuesta.usuario.tienePermiso('PUESTO_RESERVAR'), true);
+  assert.strictEqual(respuesta.usuario.tienePermiso('ACTA_INFRACCION_REGISTRAR'), false);
+});
+
+ejecutarPrueba('Inicio de sesión unificado con usuario de Fiscalizador reconoce el rol institucional', () => {
+  const servicio = new ServicioAutenticacion(new AlmacenUsuarios());
+  const respuesta = servicio.iniciarSesion('fiscalizador', '123456');
+
+  assert.strictEqual(respuesta.exito, true);
+  assert.strictEqual(respuesta.usuario.rol, 'FISCALIZADOR_MUNICIPAL');
+  assert.strictEqual(respuesta.usuario.tienePermiso('QR_ESCANEAR_VERIFICAR'), true);
+  assert.strictEqual(respuesta.usuario.tienePermiso('PUESTO_RESERVAR'), false);
+});
+
+ejecutarPrueba('Inicio de sesión unificado con correo institucional de Administración', () => {
+  const servicio = new ServicioAutenticacion(new AlmacenUsuarios());
+  const respuesta = servicio.iniciarSesion('admin@mph.gob.pe', 'admin123');
+
+  assert.strictEqual(respuesta.exito, true);
+  assert.strictEqual(respuesta.usuario.rol, 'ADMINISTRADOR_MUNICIPAL');
+  assert.strictEqual(respuesta.usuario.tienePermiso('FERIA_CREAR'), true);
 });
 
 ejecutarPrueba('Rechazar inicio de sesión con contraseña equivocada', () => {
   const servicio = new ServicioAutenticacion(new AlmacenUsuarios());
-  const respuesta = servicio.iniciarSesionComerciante('45871234', 'clave_incorrecta');
+  const respuesta = servicio.iniciarSesion('45871234', 'clave_incorrecta');
   
   assert.strictEqual(respuesta.exito, false);
   assert.strictEqual(respuesta.mensaje, 'Contraseña incorrecta. Intente de nuevo.');
@@ -91,39 +145,18 @@ ejecutarPrueba('Rechazar inicio de sesión con contraseña equivocada', () => {
 
 ejecutarPrueba('Rechazar inicio de sesión si el DNI no está en el padrón', () => {
   const servicio = new ServicioAutenticacion(new AlmacenUsuarios());
-  const respuesta = servicio.iniciarSesionComerciante('99999999', '123456');
+  const respuesta = servicio.iniciarSesion('99999999', '123456');
   
   assert.strictEqual(respuesta.exito, false);
-  assert.ok(respuesta.mensaje.includes('El DNI no está empadronado'));
+  assert.ok(respuesta.mensaje.includes('El DNI no se encuentra empadronado'));
 });
 
 // ----------------------------------------------------------------------------
-// BLOQUE 3: PRUEBAS DE USUARIOS MUNICIPALES (Jira: FSH-22)
-// ----------------------------------------------------------------------------
-console.log('\n--- 🏛️ 3. Pruebas de Funcionarios Municipales (FSH-22) ---');
-
-ejecutarPrueba('Iniciar sesión como Fiscalizador con usuario institucional', () => {
-  const servicio = new ServicioAutenticacion(new AlmacenUsuarios());
-  const respuesta = servicio.iniciarSesionInterno('fiscalizador', '123456', 'Fiscalizador');
-  
-  assert.strictEqual(respuesta.exito, true);
-  assert.strictEqual(respuesta.usuario.rol, 'Fiscalizador');
-});
-
-ejecutarPrueba('Iniciar sesión como Administrador de Gestión MPH', () => {
-  const servicio = new ServicioAutenticacion(new AlmacenUsuarios());
-  const respuesta = servicio.iniciarSesionInterno('admin', 'admin123', 'Gestión MPH');
-  
-  assert.strictEqual(respuesta.exito, true);
-  assert.strictEqual(respuesta.usuario.rol, 'Gestión MPH');
-});
-
-// ----------------------------------------------------------------------------
-// BLOQUE 4: PRUEBAS DE REGISTRO / EMPADRONAMIENTO (Jira: FSH-10, FSH-36)
+// BLOQUE 4: REGISTRO Y EMPADRONAMIENTO (FSH-10, FSH-36)
 // ----------------------------------------------------------------------------
 console.log('\n--- 📝 4. Pruebas de Registro y Unicidad de DNI (FSH-10, FSH-36) ---');
 
-ejecutarPrueba('Registrar un nuevo comerciante en el padrón y luego iniciar sesión', () => {
+ejecutarPrueba('Registrar nuevo comerciante en el padrón y autenticar por flujo unificado', () => {
   const servicio = new ServicioAutenticacion(new AlmacenUsuarios());
   
   const registro = servicio.registrarNuevoComerciante({
@@ -136,16 +169,17 @@ ejecutarPrueba('Registrar un nuevo comerciante en el padrón y luego iniciar ses
 
   assert.strictEqual(registro.exito, true);
 
-  // Probar que el nuevo usuario ahora sí puede iniciar sesión
-  const login = servicio.iniciarSesionComerciante('88776655', 'mi_clave_segura');
+  // Probar login unificado directo
+  const login = servicio.iniciarSesion('88776655', 'mi_clave_segura');
   assert.strictEqual(login.exito, true);
   assert.strictEqual(login.usuario.nombre, 'Edson Huaman Huacre');
+  assert.strictEqual(login.usuario.rol, 'COMERCIANTE');
+  assert.strictEqual(login.usuario.tienePermiso('PUESTO_RESERVAR'), true);
 });
 
-ejecutarPrueba('Rechazar el registro si el DNI ya existe (Regla de unicidad)', () => {
+ejecutarPrueba('Rechazar registro si el DNI ya existe (Regla de unicidad de DNI)', () => {
   const servicio = new ServicioAutenticacion(new AlmacenUsuarios());
   
-  // DNI 45871234 ya existe en los datos semilla
   const registroDuplicado = servicio.registrarNuevoComerciante({
     dni: '45871234',
     nombreCompleto: 'Otro Comerciante',

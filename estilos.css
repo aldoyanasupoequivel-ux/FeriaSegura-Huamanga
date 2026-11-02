@@ -564,3 +564,141 @@ body {
   cursor: pointer;
   color: #94a3b8;
 }
+
+/* --------------------------------------------------------------------------
+   BANNER DE SEGURIDAD ACL Y CHIPS DE PERMISOS
+   -------------------------------------------------------------------------- */
+.banner-seguridad-acl {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+}
+
+.banner-seguridad-acl .icono-candado {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(139, 21, 56, 0.1);
+  color: var(--color-guinda);
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.banner-seguridad-acl .texto-seguridad-acl {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.banner-seguridad-acl .texto-seguridad-acl strong {
+  font-size: 12px;
+  color: #1e293b;
+}
+
+.banner-seguridad-acl .texto-seguridad-acl span {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.etiqueta-sub {
+  font-size: 10px;
+  font-weight: 600;
+  color: #059669;
+  background: #ecfdf5;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid #a7f3d0;
+}
+
+.modal-caja-exito {
+  max-width: 480px;
+}
+
+.caja-detalle-acl {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  text-align: left;
+}
+
+.caja-detalle-acl .fila-dato {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.caja-detalle-acl .fila-dato:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.badge-rol-acl {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+
+.badge-rol-comerciante {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.badge-rol-fiscalizador {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.badge-rol-admin {
+  background: #fce7f3;
+  color: #9d174d;
+  border: 1px solid #fbcfe8;
+}
+
+.titulo-permisos {
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 12px;
+  margin-bottom: 8px;
+}
+
+.chips-permisos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip-permiso {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: monospace;
+  color: #334155;
+}
