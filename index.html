@@ -19,10 +19,6 @@
         <div class="nombre-municipio">MUNICIPALIDAD PROVINCIAL DE HUAMANGA</div>
       </div>
     </div>
-    <div class="portal-indicador">
-      <span class="punto-verde"></span>
-      <span>Portal Oficial de Ferias y Comercio</span>
-    </div>
   </header>
 
   <!-- CONTENEDOR PRINCIPAL -->
@@ -41,20 +37,6 @@
         <p class="subtitulo-sistema">Sistema de Gestión, Carga Eléctrica y Fiscalización QR</p>
       </div>
 
-      <!-- BANNER DE IDENTIFICACIÓN UNIFICADA Y SEGURIDAD ACL -->
-      <div class="banner-seguridad-acl">
-        <div class="icono-candado">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-          </svg>
-        </div>
-        <div class="texto-seguridad-acl">
-          <strong>Acceso Centralizado con Motor ACL</strong>
-          <span>Identificación automática por DNI o cuenta institucional</span>
-        </div>
-      </div>
-
       <!-- ALERTA DE MENSAJES (ERROR / ÉXITO) -->
       <div id="caja-alerta" class="mensaje-alerta"></div>
 
@@ -65,7 +47,6 @@
         <div class="grupo-campo">
           <div class="etiqueta-fila">
             <label id="etiqueta-identidad" for="campo-identidad">DNI O USUARIO INSTITUCIONAL</label>
-            <span class="etiqueta-sub">Verificado por ACL</span>
           </div>
           <div class="campo-con-icono">
             <span class="icono-izq" id="icono-campo-id">
@@ -127,25 +108,6 @@
         </button>
 
       </form>
-
-      <!-- ACCESO RÁPIDO PARA EVALUACIÓN DOCENTE / SUSTENTACIÓN -->
-      <div class="bloque-demo">
-        <div class="titulo-demo">Autocompletar credenciales de prueba para sustentar:</div>
-        <div class="pills-demo">
-          <button type="button" class="pill-boton" onclick="cargarDemo('comerciante')">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            Comerciante (DNI)
-          </button>
-          <button type="button" class="pill-boton" onclick="cargarDemo('fiscalizador')">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            Fiscalizador QR
-          </button>
-          <button type="button" class="pill-boton" onclick="cargarDemo('admin')">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/></svg>
-            Gestión MPH
-          </button>
-        </div>
-      </div>
 
       <!-- ENLACE PARA REGISTRARSE EN EL PADRÓN -->
       <div class="fila-registro" id="bloque-registro-comerciante">
